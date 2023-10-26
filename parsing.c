@@ -5,6 +5,9 @@
 
 #include "mpc.h"
 
+long eval(mpc_ast_t *t);
+long eval_op(long x, char *op, long y);
+
 int main(int argc, char *argv[]) {
   // Define Polish notation grammar
   // Example: (+ 2 2)
@@ -35,19 +38,62 @@ int main(int argc, char *argv[]) {
     add_history(input);
 
     // Parse
-    mpc_result_t result;
-    if (mpc_parse("<stdin>", input, Lispy, &result)) {
-      mpc_ast_print(result.output);
-      mpc_ast_delete(result.output);
+    mpc_result_t ast;
+    if (mpc_parse("<stdin>", input, Lispy, &ast)) {
+      long result = eval(ast.output);
+      printf("%li\n", result);
+      mpc_ast_delete(ast.output);
     } else {
-      mpc_err_print(result.error);
-      mpc_err_delete(result.error);
+      mpc_err_print(ast.error);
+      mpc_err_delete(ast.error);
     }
 
     free(input);
   }
 
   mpc_cleanup(4, Number, Operator, Expr, Lispy);
+
+  return 0;
+}
+
+long eval(mpc_ast_t *t) {
+  // If number, return directly
+  if (strstr(t->tag, "number")) {
+    return atoi(t->contents);
+  }
+
+  // The operator is always the second child, after '('
+  char *op = t->children[1]->contents;
+
+  // Store the third child in `x`
+  long x = eval(t->children[2]);
+
+  // Iterate over the remaining children and combine
+  int i = 3;
+  while (strstr(t->children[i]->tag, "expr")) {
+    x = eval_op(x, op, eval(t->children[i]));
+    i++;
+  }
+
+  return x;
+}
+
+long eval_op(long x, char *op, long y) {
+  if (strcmp(op, "+") == 0) {
+    return x + y;
+  }
+
+  if (strcmp(op, "-") == 0) {
+    return x - y;
+  }
+
+  if (strcmp(op, "*") == 0) {
+    return x * y;
+  }
+
+  if (strcmp(op, "/") == 0) {
+    return x / y;
+  }
 
   return 0;
 }
