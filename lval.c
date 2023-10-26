@@ -96,6 +96,12 @@ void lval_println(lval* v) {
   putchar('\n');
 }
 
+static void lval_debug(lval* v) {
+  printf("[DEBUG]: ");
+  lval_print(v);
+  putchar('\n');
+}
+
 lval* lval_read_num(mpc_ast_t* t) {
   // `strtol` uses a global variable, `errno`, for some reason
   errno = 0;
@@ -175,6 +181,7 @@ lval* lval_builtin(lval* a, char* func) {
   if (strcmp("tail", func) == 0) return lval_builtin_tail(a);
   if (strcmp("join", func) == 0) return lval_builtin_join(a);
   if (strcmp("eval", func) == 0) return lval_builtin_eval(a);
+  if (strcmp("len", func) == 0) return lval_builtin_len(a);
   if (strcmp("+-/*", func)) return lval_builtin_op(a, func);
 
   lval_del(a);
@@ -287,6 +294,19 @@ lval* lval_builtin_join(lval* a) {
   lval_del(a);
 
   return x;
+}
+
+lval* lval_builtin_len(lval* a) {
+  LASSERT(a, a->count == 1, "Function 'len' passed too many arguments!");
+  LASSERT(a, a->cell[0]->type == LVAL_QEXPR,
+          "Function 'len' passed incorrect type.");
+
+  lval* x = lval_take(a, 0);
+  lval* len = lval_num(x->count);
+
+  lval_del(x);
+
+  return len;
 }
 
 lval* lval_eval(lval* v) {

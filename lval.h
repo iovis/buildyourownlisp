@@ -43,6 +43,7 @@ lval* lval_builtin_tail(lval* a);
 lval* lval_builtin_list(lval* a);
 lval* lval_builtin_eval(lval* a);
 lval* lval_builtin_join(lval* a);
+lval* lval_builtin_len(lval* a);
 
 lval* lval_join(lval* x, lval* y);
 lval* lval_pop(lval* v, int i);
