@@ -13,8 +13,10 @@
 lval* lval_num(long x) {
   lval* v = malloc(sizeof(lval));
 
-  v->type = LVAL_NUM;
-  v->num = x;
+  *v = (lval){
+      .type = LVAL_NUM,
+      .num = x,
+  };
 
   return v;
 }
