@@ -36,8 +36,15 @@ lval* lval_add(lval* v, lval* x);
 
 lval* lval_eval_sexpr(lval* v);
 lval* lval_eval(lval* v);
+lval* lval_builtin(lval* a, char* func);
 lval* lval_builtin_op(lval* a, char* op);
+lval* lval_builtin_head(lval* a);
+lval* lval_builtin_tail(lval* a);
+lval* lval_builtin_list(lval* a);
+lval* lval_builtin_eval(lval* a);
+lval* lval_builtin_join(lval* a);
 
+lval* lval_join(lval* x, lval* y);
 lval* lval_pop(lval* v, int i);
 lval* lval_take(lval* v, int i);
 

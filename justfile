@@ -1,4 +1,4 @@
-cc_flags := "-std=c17 -Wall -Wextra -Wpedantic -fsanitize=address"
+cc_flags := "-std=c17 -Wall -fsanitize=address" # -Wextra -Wpedantic
 libs := "-ledit -lm"
 
 default: run
