@@ -1,5 +1,7 @@
 #include "builtin.h"
 
+#include "lval.h"
+
 #define LASSERT(args, cond, err) \
   if (!(cond)) {                 \
     lval_del(args);              \
@@ -131,8 +133,36 @@ lval* builtin_len(lenv* e, lval* a) {
   return len;
 }
 
+lval* builtin_def(lenv* e, lval* a) {
+  LASSERT(a, a->cell[0]->type == LVAL_QEXPR,
+      "Function 'def' passed incorrect types!");
+
+  // First argument is a symbol list
+  lval* symbols = a->cell[0];
+
+  // Validate they're all symbols
+  for (int i = 0; i < symbols->count; i++) {
+    LASSERT(a, symbols->cell[i]->type == LVAL_SYM,
+        "Function 'def' cannot define non-symbol");
+  }
+
+  LASSERT(a, symbols->count == a->count - 1,
+      "Function 'def' cannot define incorrect "
+      "number of values to symbols");
+
+  // Assign copies of values to symbols
+  for (int i = 0; i < symbols->count; i++) {
+    lenv_put(e, symbols->cell[i], a->cell[i + 1]);
+  }
+
+  lval_del(a);
+
+  return lval_sexpr();
+}
+
 void add_builtins(lenv* e) {
   // List functions
+  lenv_add_builtin(e, "def", builtin_def);
   lenv_add_builtin(e, "list", builtin_list);
   lenv_add_builtin(e, "head", builtin_head);
   lenv_add_builtin(e, "tail", builtin_tail);
