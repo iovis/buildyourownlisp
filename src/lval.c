@@ -1,5 +1,6 @@
 #include "lval.h"
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,12 +16,23 @@ lval* lval_num(long x) {
   return v;
 }
 
-lval* lval_err(char* message) {
+lval* lval_err(char* fmt, ...) {
   lval* v = malloc(sizeof(lval));
-
   v->type = LVAL_ERR;
-  v->err = malloc(strlen(message) + 1);
-  strcpy(v->err, message);
+
+  // Create a VA list and initialize it
+  va_list va;
+  va_start(va, fmt);
+
+  // Allocate 512 bytes as buffer for the copy
+  v->err = malloc(512);
+  vsnprintf(v->err, 511, fmt, va);
+
+  // Reallocate to fit
+  v->err = realloc(v->err, strlen(v->err) + 1);
+
+  // Clean up the VA list
+  va_end(va);
 
   return v;
 }
@@ -62,6 +74,25 @@ lval* lval_fun(lbuiltin func) {
   v->fun = func;
 
   return v;
+}
+
+char* ltype_name(int t) {
+  switch (t) {
+    case LVAL_FUN:
+      return "Function";
+    case LVAL_NUM:
+      return "Number";
+    case LVAL_ERR:
+      return "Error";
+    case LVAL_SYM:
+      return "Symbol";
+    case LVAL_SEXPR:
+      return "S-Expression";
+    case LVAL_QEXPR:
+      return "Q-Expression";
+    default:
+      return "Unknown";
+  }
 }
 
 void lval_expr_print(lval* v, char open, char close) {
@@ -311,7 +342,7 @@ lval* lenv_get(lenv* e, lval* k) {
     }
   }
 
-  return lval_err("unbound symbol!");
+  return lval_err("Unbound symbol '%s'", k->sym);
 }
 
 void lenv_put(lenv* e, lval* k, lval* v) {

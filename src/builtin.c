@@ -2,10 +2,11 @@
 
 #include "lval.h"
 
-#define LASSERT(args, cond, err) \
-  if (!(cond)) {                 \
-    lval_del(args);              \
-    return lval_err(err);        \
+#define LASSERT(args, cond, fmt, ...)         \
+  if (!(cond)) {                              \
+    lval* err = lval_err(fmt, ##__VA_ARGS__); \
+    lval_del(args);                           \
+    return err;                               \
   }
 
 lval* builtin_op(lenv* e, lval* a, char* op) {
@@ -56,9 +57,14 @@ lval* builtin_div(lenv* e, lval* a) { return builtin_op(e, a, "/"); }
 
 lval* builtin_head(lenv* e, lval* a) {
   // Error conditions
-  LASSERT(a, a->count == 1, "Function 'head' passed too many arguments!");
+  LASSERT(a, a->count == 1,
+          "Function 'head' passed too many arguments. "
+          "Got %i, expected %i.",
+          a->count, 1);
   LASSERT(a, a->cell[0]->type == LVAL_QEXPR,
-          "Function 'head' passed incorrect types!");
+          "Function 'head' passed incorrect type for argument 0. "
+          "Got %s, Expected %s.",
+          ltype_name(a->cell[0]->type), ltype_name(LVAL_QEXPR));
   LASSERT(a, a->cell[0]->count != 0, "Function 'head' passed {}!");
 
   // Otherwise, take first argument
@@ -135,7 +141,7 @@ lval* builtin_len(lenv* e, lval* a) {
 
 lval* builtin_def(lenv* e, lval* a) {
   LASSERT(a, a->cell[0]->type == LVAL_QEXPR,
-      "Function 'def' passed incorrect types!");
+          "Function 'def' passed incorrect types!");
 
   // First argument is a symbol list
   lval* symbols = a->cell[0];
@@ -143,12 +149,12 @@ lval* builtin_def(lenv* e, lval* a) {
   // Validate they're all symbols
   for (int i = 0; i < symbols->count; i++) {
     LASSERT(a, symbols->cell[i]->type == LVAL_SYM,
-        "Function 'def' cannot define non-symbol");
+            "Function 'def' cannot define non-symbol");
   }
 
   LASSERT(a, symbols->count == a->count - 1,
-      "Function 'def' cannot define incorrect "
-      "number of values to symbols");
+          "Function 'def' cannot define incorrect "
+          "number of values to symbols");
 
   // Assign copies of values to symbols
   for (int i = 0; i < symbols->count; i++) {

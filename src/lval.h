@@ -39,11 +39,12 @@ struct lenv {
 };
 
 lval* lval_num(long x);
-lval* lval_err(char* message);
+lval* lval_err(char* fmt, ...);
 lval* lval_sym(char* sym);
 lval* lval_sexpr(void);
 lval* lval_qexpr(void);
 lval* lval_fun(lbuiltin func);
+char* ltype_name(int t);
 
 void lval_expr_print(lval* v, char open, char close);
 void lval_print(lval* v);
