@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "builtin.h"
 #include "lval.h"
 #include "mpc.h"
 
@@ -30,7 +31,7 @@ int main(int argc, char* argv[]) {
   puts("Press ctrl+c to exit\n");
 
   lenv* env = lenv_new();
-  lenv_add_builtins(env);
+  add_builtins(env);
 
   while (1) {
     // Output prompt and get input

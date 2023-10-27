@@ -9,7 +9,7 @@ run: build
     ./target/main
 
 build: init
-    cc {{cc_flags}} {{libs}} -g src/*.c -o target/main
+    bear -- cc {{cc_flags}} {{libs}} -g src/*.c -o target/main
 
 release: init
     cc {{cc_flags}} {{libs}} -O3 src/*.c -o target/main

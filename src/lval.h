@@ -55,18 +55,6 @@ lval* lval_add(lval* v, lval* x);
 
 lval* lval_eval_sexpr(lenv* e, lval* v);
 lval* lval_eval(lenv* e, lval* v);
-lval* lval_builtin(lenv* e, lval* a, char* func);
-lval* lval_builtin_op(lenv* e, lval* a, char* op);
-lval* lval_builtin_add(lenv* e, lval* a);
-lval* lval_builtin_sub(lenv* e, lval* a);
-lval* lval_builtin_mul(lenv* e, lval* a);
-lval* lval_builtin_div(lenv* e, lval* a);
-lval* lval_builtin_head(lenv* e, lval* a);
-lval* lval_builtin_tail(lenv* e, lval* a);
-lval* lval_builtin_list(lenv* e, lval* a);
-lval* lval_builtin_eval(lenv* e, lval* a);
-lval* lval_builtin_join(lenv* e, lval* a);
-lval* lval_builtin_len(lenv* e, lval* a);
 
 lval* lval_join(lval* x, lval* y);
 lval* lval_pop(lval* v, int i);
@@ -78,5 +66,4 @@ lenv* lenv_new(void);
 lval* lenv_get(lenv* e, lval* k);
 void lenv_put(lenv* e, lval* k, lval* v);
 void lenv_add_builtin(lenv* e, char* name, lbuiltin func);
-void lenv_add_builtins(lenv* e);
 void lenv_del(lenv* e);
