@@ -1,9 +1,11 @@
 cc_flags := "-std=c17 -Wall -fsanitize=address" # -Wextra -Wpedantic
 libs := "-ledit -lm"
 
-default: build run
+alias dev := default
 
-run:
+default: run
+
+run: build
     ./target/main
 
 build: init

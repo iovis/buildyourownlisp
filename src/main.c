@@ -6,9 +6,6 @@
 #include "mpc.h"
 
 int main(int argc, char* argv[]) {
-  // Define Polish notation grammar
-  // Example: (+ 2 2)
-
   // Parsers
   mpc_parser_t* Number = mpc_new("number");
   mpc_parser_t* Symbol = mpc_new("symbol");
@@ -19,19 +16,21 @@ int main(int argc, char* argv[]) {
 
   // Grammar
   mpca_lang(MPCA_LANG_DEFAULT,
-            "                                                     \
-            number : /-?[0-9]+/ ;                                 \
-            symbol : \"list\" | \"head\" | \"tail\" | \"join\"    \
-                   | \"eval\" | \"len\" | '+' | '-' | '*' | '/' ; \
-            sexpr  : '(' <expr>* ')' ;                            \
-            qexpr  : '{' <expr>* '}' ;                            \
-            expr   : <number> | <symbol> | <sexpr> | <qexpr> ;    \
-            lispy  : /^/ <expr>* /$/ ;                            \
+            "                                                  \
+            number : /-?[0-9]+/ ;                              \
+            symbol : /[a-zA-Z0-9_+\\-*\\/\\\\=<>!&]+/ ;        \
+            sexpr  : '(' <expr>* ')' ;                         \
+            qexpr  : '{' <expr>* '}' ;                         \
+            expr   : <number> | <symbol> | <sexpr> | <qexpr> ; \
+            lispy  : /^/ <expr>* /$/ ;                         \
             ",
             Number, Symbol, Sexpr, Qexpr, Expr, Lispy);
 
   puts("Lispy Version 0.1");
   puts("Press ctrl+c to exit\n");
+
+  lenv* env = lenv_new();
+  lenv_add_builtins(env);
 
   while (1) {
     // Output prompt and get input
@@ -43,8 +42,11 @@ int main(int argc, char* argv[]) {
     // Parse
     mpc_result_t ast;
     if (mpc_parse("<stdin>", input, Lispy, &ast)) {
-      lval* x = lval_eval(lval_read(ast.output));
+      lval* x = lval_eval(env, lval_read(ast.output));
+
       lval_println(x);
+      lval_del(x);
+
       mpc_ast_delete(ast.output);
     } else {
       mpc_err_print(ast.error);
@@ -53,6 +55,8 @@ int main(int argc, char* argv[]) {
 
     free(input);
   }
+
+  lenv_del(env);
 
   mpc_cleanup(6, Number, Symbol, Sexpr, Qexpr, Expr, Lispy);
 
